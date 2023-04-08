@@ -1,18 +1,18 @@
 package ldaptreevis
 
 import (
-	"fmt"
-	"strings"
 	"errors"
-	"sort"
+	"fmt"
 	"github.com/google/uuid"
+	"sort"
+	"strings"
 )
 
 type Collection struct {
 	Nodes []*Node
 }
 
-func (c *Collection) AddNodeIfNotExist(node *Node) () {
+func (c *Collection) AddNodeIfNotExist(node *Node) {
 	_, found := c.FindNodeExactLineage(node.Value, node.Lineage, node.Depth)
 	if !found {
 		if len(c.Nodes) == 0 {
@@ -22,7 +22,7 @@ func (c *Collection) AddNodeIfNotExist(node *Node) () {
 	}
 }
 
-func (c *Collection) NewNode (value string, depth int) (*Node) {
+func (c *Collection) NewNode(value string, depth int) *Node {
 	node := &Node{
 		Value: value,
 		Depth: depth,
@@ -32,7 +32,7 @@ func (c *Collection) NewNode (value string, depth int) (*Node) {
 }
 
 func (c *Collection) FindNode(value string) (result *Node, ok bool) {
-	for _, node := range(c.Nodes) {
+	for _, node := range c.Nodes {
 		if node.Value == value {
 			result = node
 			ok = true
@@ -42,7 +42,7 @@ func (c *Collection) FindNode(value string) (result *Node, ok bool) {
 }
 
 func (c *Collection) FindNodeExact(value string, depth int) (result *Node, ok bool) {
-	for _, node := range(c.Nodes) {
+	for _, node := range c.Nodes {
 		if (node.Value == value) && (node.Depth == depth) {
 			result = node
 			ok = true
@@ -52,9 +52,9 @@ func (c *Collection) FindNodeExact(value string, depth int) (result *Node, ok bo
 }
 
 func (c *Collection) FindNodeExactLineage(value, lineage string, depth int) (result *Node, ok bool) {
-	for _, node := range(c.Nodes) {
-		if (node.Value == value && node.Depth == depth) {
-			if (node.Lineage == lineage) {
+	for _, node := range c.Nodes {
+		if node.Value == value && node.Depth == depth {
+			if node.Lineage == lineage {
 				result = node
 				ok = true
 			}
@@ -64,25 +64,25 @@ func (c *Collection) FindNodeExactLineage(value, lineage string, depth int) (res
 }
 
 type Node struct {
-	Value string `json:"label"`
-	Children []*Node `json:"children,omitempty"`
-	Parent *Node `json:"-"`
-	Uid uuid.UUID `json:"-"`
-	Depth int `json:"depth"`
-	Lineage string `json:"-"`
+	Value    string    `json:"label"`
+	Children []*Node   `json:"children,omitempty"`
+	Parent   *Node     `json:"-"`
+	Uid      uuid.UUID `json:"-"`
+	Depth    int       `json:"depth"`
+	Lineage  string    `json:"-"`
 }
 
-func (n *Node) Dump(start string) (string) {
+func (n *Node) Dump(start string) string {
 	padding := strings.Repeat("  ", n.Depth)
 	start += fmt.Sprintf("%s%s\n", padding, n.Value)
-	for _, node := range(n.Children) {
+	for _, node := range n.Children {
 		start = node.Dump(start)
 	}
 	return start
 }
 
 func (n *Node) HasChild(value string) (found bool) {
-	for _, child := range(n.Children) {
+	for _, child := range n.Children {
 		if child.Value == value {
 			found = true
 		}
@@ -105,7 +105,7 @@ func (n *Node) AddParent(parent *Node) {
 func ParseDNs(input []string) (root *Node, vis string, err error) {
 	maxDepth := 0
 	var results []map[int]string
-	for _, i := range(input) {
+	for _, i := range input {
 		result, err := ParseDN(i)
 		if err != nil {
 			return root, vis, err
@@ -120,26 +120,26 @@ func ParseDNs(input []string) (root *Node, vis string, err error) {
 	root = col.NewNode("root", 0)
 	root.Lineage = "root "
 	col.AddNodeIfNotExist(root)
-	for _, bore := range(results) {
+	for _, bore := range results {
 		// first order the map
 		keys := make([]int, 0)
-		for k, _ := range bore{
+		for k, _ := range bore {
 			keys = append(keys, k)
 		}
 		sort.Sort(sort.Reverse(sort.IntSlice(keys)))
 		// loop through keys in order
-		for i, level := range(keys) {
+		for i, level := range keys {
 			unit := bore[level]
 			cur := col.NewNode(unit, i+1)
-			parentName := bore[level + 1]
+			parentName := bore[level+1]
 			expectedParentDepth := i
 			lineage := ""
 			parentLineage := ""
-			for j := level+1; j < len(bore); j++ {
-				parentLineage = fmt.Sprintf("%s ",bore[j]) + parentLineage
+			for j := level + 1; j < len(bore); j++ {
+				parentLineage = fmt.Sprintf("%s ", bore[j]) + parentLineage
 			}
 			for j := level; j < len(bore); j++ {
-				lineage = fmt.Sprintf("%s ",bore[j]) + lineage
+				lineage = fmt.Sprintf("%s ", bore[j]) + lineage
 			}
 			if parentName == "" {
 				parentName = "root"
@@ -148,10 +148,10 @@ func ParseDNs(input []string) (root *Node, vis string, err error) {
 			parentLineage = "root " + parentLineage
 			cur.Lineage = lineage
 			if parentNode, ok := col.FindNodeExactLineage(
-					parentName,
-					parentLineage,
-					expectedParentDepth,
-					); ok {
+				parentName,
+				parentLineage,
+				expectedParentDepth,
+			); ok {
 				if !parentNode.HasChild(cur.Value) {
 					col.AddNodeIfNotExist(cur)
 					parentNode.AddChild(cur)
@@ -167,7 +167,7 @@ func ParseDN(input string) (out map[int]string, err error) {
 	out = make(map[int]string)
 	chunks := strings.Split(input, ",")
 	if len(chunks) > 0 {
-		for i, s := range(chunks) {
+		for i, s := range chunks {
 			lchunks := strings.Split(s, "=")
 			if len(lchunks) == 2 {
 				out[i] = lchunks[1]
