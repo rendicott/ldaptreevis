@@ -20,7 +20,7 @@ func main() {
 		"CN=LongAdmin,OU=Bob,OU=Doug,OU=gone,OU=Groups,OU=YourTown,OU=America,OU=MYCOMPANY,DC=MYTOWN,DC=MYCOMPANY,DC=com",
 		"CN=ShortAdmin,OU=Groups,OU=MYCOMPANY,DC=MYTOWN,DC=MYCOMPANY,DC=com",
 	}
-	root, _, err := ldaptreevis.ParseDNs(s)
+	root, _, err := ldaptreevis.BuildTree(s)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 	}
