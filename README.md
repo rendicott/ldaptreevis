@@ -1,6 +1,8 @@
 # ldaptreevis
 Structures LDAP Distinguished Name strings into a visualized tree. 
 
+[docs](#docs)
+
 For example, providing a slice of strings like
 ```
 "CN=SPSAdmins,OU=Groups,OU=MYTOWN,OU=Germany,OU=MYCOMPANY,DC=MYTOWN,DC=MYCOMPANY,DC=com",
@@ -312,3 +314,44 @@ You can also use the returned root node to do whatever you want, e.g., export to
   "lineage": "root "
 }
 ``` 
+
+# Docs
+```
+TYPES
+
+type Node struct {
+        Value     string    `json:"label"`
+        Class     string    `json:"class"`
+        Children  []*Node   `json:"children,omitempty"`
+        Parent    *Node     `json:"-"`
+        ParentUid string    `json:"parentUid"`
+        Uid       uuid.UUID `json:"uid"`
+        Depth     int       `json:"depth"`
+        Lineage   string    `json:"lineage"`
+}
+    Node contains properties and methods to represent an object in the LDAP tree
+    and to alter properties such as children, parent, value, etc.
+
+func BuildTree(input []string) (root *Node, vis string, err error)
+    BuildTree takes a slice of LDAP Distinguished Name strings and attempts to
+    build a node tree that represents all of their relationships (if any) under
+    a generic parent "root" node.
+
+    It will return the root node object and the visualization string and any
+    errors.
+
+func (n *Node) AddChild(child *Node)
+    AddChild adds a Node to this node's children and updates the provided Node's
+    parent property as well.
+
+func (n *Node) AddParent(parent *Node)
+    AddParent updates the parent of the current node to the node provided in the
+    argument. Somewhat safe.
+
+func (n *Node) FmtTree(start string) string
+    FmtTree returns a string formatted as a multiline tree representing thise
+    Node and it's children.
+
+func (n *Node) HasChild(value string) (found bool)
+    HasChild searches the Node's children for a child with the requested value.
+```
