@@ -50,7 +50,36 @@ root
             ShortAdmin
 ```
 
-See example usage in `cmd/main.go`
+See example usage in `cmd/main.go` of how to read DN's from STDIN and display a tree.
+
+```
+# https://www.forumsys.com/2022/05/10/online-ldap-test-server/
+
+$ ldapsearch -x -H ldap://ldap.forumsys.com -D "cn=read-only-admin,dc=example,dc=com" -w password -b "dc=example,dc=com" | grep "dn:" | cut -d ' ' -f 2 | go run main.go
+root
+  com
+    example
+      admin
+      newton
+      einstein
+      tesla
+      galieleo
+      euler
+      gauss
+      riemann
+      euclid
+      mathematicians
+      scientists
+        italians
+      read-only-admin
+      test
+      chemists
+      curie
+      nobel
+      boyle
+      pasteur
+      nogroup
+```
 
 You can also use the returned root node to do whatever you want, e.g., export to JSON
 

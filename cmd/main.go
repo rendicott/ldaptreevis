@@ -2,33 +2,27 @@ package main
 
 import (
 	"fmt"
-	"encoding/json"
 	"github.com/rendicott/ldaptreevis"
+	"bufio"
+	"os"
 )
 
 func main() {
-	s := []string{
-		"CN=SPSAdmins,OU=Groups,OU=MYTOWN,OU=Germany,OU=MYCOMPANY,DC=MYTOWN,DC=MYCOMPANY,DC=com",
-		"CN=FooAdmin,OU=Groups,OU=MYTOWN,OU=Germany,OU=MYCOMPANY,DC=MYTOWN,DC=MYCOMPANY,DC=com",
-		"CN=BarAdmin,OU=Groups,OU=MYTOWN,OU=Germany,OU=MYCOMPANY,DC=MYTOWN,DC=MYCOMPANY,DC=com",
-		"CN=SPSAdmins,OU=Groups,OU=MYTOWN,OU=America,OU=MYCOMPANY,DC=MYTOWN,DC=MYCOMPANY,DC=com",
-		"CN=FooAdmin,OU=Groups,OU=MYTOWN,OU=America,OU=MYCOMPANY,DC=MYTOWN,DC=MYCOMPANY,DC=com",
-		"CN=BarAdmin,OU=Groups,OU=MYTOWN,OU=America,OU=MYCOMPANY,DC=MYTOWN,DC=MYCOMPANY,DC=com",
-		"CN=SPSAdmins,OU=Groups,OU=YourTown,OU=America,OU=MYCOMPANY,DC=MYTOWN,DC=MYCOMPANY,DC=com",
-		"CN=FooAdmin,OU=Groups,OU=YourTown,OU=America,OU=MYCOMPANY,DC=MYTOWN,DC=MYCOMPANY,DC=com",
-		"CN=BarAdmin,OU=Groups,OU=YourTown,OU=America,OU=MYCOMPANY,DC=MYTOWN,DC=MYCOMPANY,DC=com",
-		"CN=LongAdmin,OU=Bob,OU=Doug,OU=gone,OU=Groups,OU=YourTown,OU=America,OU=MYCOMPANY,DC=MYTOWN,DC=MYCOMPANY,DC=com",
-		"CN=ShortAdmin,OU=Groups,OU=MYCOMPANY,DC=MYTOWN,DC=MYCOMPANY,DC=com",
+	scanner := bufio.NewScanner(os.Stdin)
+	var s []string
+	// build DN slice from STDIN
+	for scanner.Scan() {
+		s = append(s, scanner.Text())
 	}
-	root, _, err := ldaptreevis.BuildTree(s)
+	// pass into the tree builder
+	_, vis, err := ldaptreevis.BuildTree(s)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 	}
-	//fmt.Println(vis)
+	// print the visualization
+	fmt.Println(vis)
 
-	b, err := json.Marshal(root)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+	if err := scanner.Err(); err != nil {
+		fmt.Println(err)
 	}
-	fmt.Println(string(b))
 }
