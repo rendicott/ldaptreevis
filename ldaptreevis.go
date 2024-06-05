@@ -127,7 +127,7 @@ func (n *Node) AddParent(parent *Node) {
 //
 // It will return the root node object and the visualization string
 // and any errors.
-func BuildTree(input []string) (root *Node, vis string, err error) {
+func BuildTree(input []string, rootLabel string) (root *Node, vis string, err error) {
 	// first build a map of the strings so they can be processed
 	// in an ordered map
 	var results []map[int]pair
@@ -143,8 +143,8 @@ func BuildTree(input []string) (root *Node, vis string, err error) {
 	// of searching, etc.
 	col := collection{}
 	// build the initial root node
-	root = col.newNode("root", 0)
-	seed := "root "
+	root = col.newNode(rootLabel, 0)
+	seed := fmt.Sprintf("%s ", rootLabel)
 	root.Lineage = seed
 	root.Class = "root"
 	col.addNodeIfNotExist(root)

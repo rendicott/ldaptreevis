@@ -15,7 +15,7 @@ func main() {
 		s = append(s, scanner.Text())
 	}
 	// pass into the tree builder
-	_, vis, err := ldaptreevis.BuildTree(s)
+	_, vis, err := ldaptreevis.BuildTree(s, "root")
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 	}
